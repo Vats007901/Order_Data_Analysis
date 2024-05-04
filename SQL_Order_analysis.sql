@@ -36,19 +36,19 @@ select product_id, region, sum_total from cte_rank where rank<=5 order by region
 
  
  --find month over month growth comparision for 2022 and 2023 sales ; jan 2022 vs jan 2023
-	with cte_montlysales as(
-	select year(order_date) as order_year, month(order_date)  as month_year,sum(sale_price) as sales
-	from df_orders
-	group by year(order_date),month(order_date) 
-	)
+with cte_montlysales as(
+select year(order_date) as order_year, month(order_date)  as month_year,sum(sale_price) as sales
+from df_orders
+group by year(order_date),month(order_date) 
+)
 
-	select month_year , sum(case when  order_year=2022 then sales else 0  end) as sales_2022 ,
-	sum(case when  order_year=2023 then sales else 0 end) as sales_2023   from cte_montlysales group by month_year;
+select month_year , sum(case when  order_year=2022 then sales else 0  end) as sales_2022 ,
+sum(case when  order_year=2023 then sales else 0 end) as sales_2023   from cte_montlysales group by month_year;
 
-	--for each category which month had highest sales
-	with cte_month as (
-	select category,format(order_date,'yyyyMM')as order_year_month ,sum(sale_price) as sales from df_orders group by category,format(order_date,'yyyyMM')
-  )
+--for each category which month had highest sales
+with cte_month as (
+select category,format(order_date,'yyyyMM')as order_year_month ,sum(sale_price) as sales from df_orders group by category,format(order_date,'yyyyMM')
+		)
   , cte_rank as(
   select category,order_year_month , row_number() over(partition by category order by sales desc) as rnk from cte_month)
   select category, order_year_month from cte_rank where rnk=1;
